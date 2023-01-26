@@ -327,7 +327,7 @@ after_bundle do
 
   # RUBOCOP
   ########################################
-  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/.rubocop.yml > .rubocop.yml'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/.rubocop.yml > .rubocop.yml"
 
   # Git
   ########################################
