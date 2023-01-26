@@ -239,17 +239,12 @@ after_bundle do
   ########################################
   run 'rm app/views/pages/home.html.erb'
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.html.erb > app/views/pages/home.html.erb"
-  # copy_file 'home.html.erb'
-  # run 'mv home.html.erb app/views/pages/home.html.erb'
 
   run 'rm app/javascript/controllers/clock_controller.js'
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock_controller.js >  app/javascript/controllers/clock_controller.js"
-  # copy_file 'clock_controller.js'
-  # run 'mv clock_controller.js app/javascript/controllers/clock_controller.js'
 
-  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.scss > app/assets/stylesheets/pages/home.scss"
-  # copy_file 'home.scss'
-  # run 'mv home.scss app/assets/stylesheets/pages/home.scss'
+
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.scss > app/assets/stylesheets/pages/_home.scss"
 
   append_file 'app/assets/stylesheets/pages/_index.scss', "@import 'home';"
 
@@ -285,7 +280,7 @@ after_bundle do
 
   # Yarn
   ########################################
-  run 'yarn add bootstrap chokidar @popperjs/core esbuild-sass-plugin'
+  run 'yarn add bootstrap chokidar @popperjs/core esbuild-sass-plugin esbuild@0.17.14'
 
   # ESBUILD CONFIG
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
