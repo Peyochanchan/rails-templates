@@ -8,7 +8,7 @@ end
 
 # GEMFILE
 remove_file 'Gemfile'
-copy_file 'Gemfile'
+run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/Gemfile > Gemfile"
 
 inject_into_file 'Gemfile', after: "gem 'simple_form', github: 'heartcombo/simple_form'\n" do
   <<~'RUBY'
@@ -19,12 +19,12 @@ end
 if yes?('Would you like to add pundit?[yes | no]')
   inject_into_file 'Gemfile', after: "gem 'devise'\n" do
     <<~'RUBY'
-      gem "pundit"
+        gem "pundit"
     RUBY
   end
   inject_into_file 'Gemfile', after: "gem 'warden-rspec-rails'\n" do
     <<~'RUBY'
-      gem 'pundit-matchers', '~> 1.7.0'
+        gem 'pundit-matchers', '~> 1.7.0'
     RUBY
   end
 end
@@ -42,10 +42,9 @@ end
 ########################################
 run 'rm -rf app/assets/stylesheets'
 run 'rm -rf vendor'
-copy_file 'stylesheets.zip'
-run 'unzip stylesheets.zip -d app/assets && rm -rf stylesheets.zip'
-run 'rm -rf app/assets/__MACOSX'
-remove_file 'app/assets/stylesheets/README.md'
+run "curl -L https://github.com/Peyochanchan/rails-templates/blob/main/stylesheets.zip > stylesheets.zip"
+run "unzip stylesheets.zip -d app/assets && rm -f stylesheets.zip && rm -f app/assets/rails-stylesheets-master/README.md"
+run "mv app/assets/rails-stylesheets-master app/assets/stylesheets"
 
 gsub_file(
   'app/assets/config/manifest.js',
@@ -218,12 +217,16 @@ after_bundle do
     end
   RUBY
 
-  if File.read("Gemfile") =~ /^\s*gem ['"]pundit['"]/
-    file 'app/controllers/application_controller.rb', app_controller_content_with_pundit
-  else
+  app_controller_content_without_pundit = <<~RUBY
     class ApplicationController < ActionController::Base
       before_action :authenticate_user!
     end
+  RUBY
+
+  if File.read("Gemfile") =~ /^\s*gem ['"]pundit['"]/
+    file 'app/controllers/application_controller.rb', app_controller_content_with_pundit
+  else
+    file 'app/controllers/application_controller.rb', app_controller_content_without_pundit
   end
 
   # Pages Controller
@@ -235,15 +238,18 @@ after_bundle do
   # Home Page
   ########################################
   run 'rm app/views/pages/home.html.erb'
-  copy_file 'home.html.erb'
-  run 'mv home.html.erb app/views/pages/home.html.erb'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.html.erb > app/views/pages/home.html.erb"
+  # copy_file 'home.html.erb'
+  # run 'mv home.html.erb app/views/pages/home.html.erb'
 
   run 'rm app/javascript/controllers/clock_controller.js'
-  copy_file 'clock_controller.js'
-  run 'mv clock_controller.js app/javascript/controllers/clock_controller.js'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock_controller.js >  app/javascript/controllers/clock_controller.js"
+  # copy_file 'clock_controller.js'
+  # run 'mv clock_controller.js app/javascript/controllers/clock_controller.js'
 
-  copy_file 'home.scss'
-  run 'mv home.scss app/assets/stylesheets/pages/home.scss'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.scss > app/assets/stylesheets/pages/home.scss"
+  # copy_file 'home.scss'
+  # run 'mv home.scss app/assets/stylesheets/pages/home.scss'
 
   append_file 'app/assets/stylesheets/pages/_index.scss', "@import 'home';"
 
@@ -282,7 +288,7 @@ after_bundle do
   run 'yarn add bootstrap chokidar @popperjs/core esbuild-sass-plugin'
 
   # ESBUILD CONFIG
-  copy_file 'esbuild-dev.config.js'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
   gsub_file(
     'package.json',
     '"build": "esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=assets"',
@@ -321,7 +327,7 @@ after_bundle do
 
   # RUBOCOP
   ########################################
-  copy_file '.rubocop.yml'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/.rubocop.yml > .rubocop.yml'
 
   # Git
   ########################################
