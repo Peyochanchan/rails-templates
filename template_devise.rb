@@ -280,7 +280,7 @@ after_bundle do
 
   # Yarn
   ########################################
-  run 'yarn add bootstrap chokidar sass @popperjs/core esbuild-sass-plugin'
+  run 'yarn add esbuild@0.15.15 bootstrap chokidar sass @popperjs/core esbuild-sass-plugin'
 
   # ESBUILD CONFIG
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
