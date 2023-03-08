@@ -131,7 +131,7 @@ after_bundle do
   # Generators: db + simple form + pages controller
   ########################################
   rails_command 'db:drop db:create db:migrate'
-  # generate('simple_form:install', '--bootstrap')
+  generate('simple_form:install', '--bootstrap')
   generate 'annotate:install'
   generate 'rspec:install'
   generate 'stimulus clock'
