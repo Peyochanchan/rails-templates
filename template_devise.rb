@@ -131,12 +131,12 @@ after_bundle do
   # Generators: db + simple form + pages controller
   ########################################
   rails_command 'db:drop db:create db:migrate'
-  generate('simple_form:install', '--bootstrap')
+  # generate('simple_form:install', '--bootstrap')
   generate 'annotate:install'
   generate 'rspec:install'
   generate 'stimulus clock'
   generate(:controller, 'pages', 'home', '--skip-routes', '--no-test-framework')
-  if File.read("Gemfile") =~ /^\s*gem ['"]pundit['"]/
+  if File.readlines("Gemfile").grep(/pundit/).any?
     generate 'pundit:install'
   end
   # Routes
@@ -223,7 +223,7 @@ after_bundle do
     end
   RUBY
 
-  if File.read("Gemfile") =~ /^\s*gem ['"]pundit['"]/
+  if File.readlines("Gemfile").grep(/pundit/).any?
     file 'app/controllers/application_controller.rb', app_controller_content_with_pundit
   else
     file 'app/controllers/application_controller.rb', app_controller_content_without_pundit
@@ -280,7 +280,7 @@ after_bundle do
 
   # Yarn
   ########################################
-  run 'yarn add bootstrap chokidar @popperjs/core esbuild-sass-plugin esbuild@0.15.14'
+  run 'yarn add bootstrap chokidar sass @popperjs/core esbuild-sass-plugin'
 
   # ESBUILD CONFIG
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
