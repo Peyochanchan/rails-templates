@@ -38,26 +38,6 @@ if yes?('Would you like to add activeadmin?[yes | no]')
   end
 end
 
-# STYLESHEETS
-########################################
-# run 'rm -rf app/assets/stylesheets'
-# run 'rm -rf vendor'
-# run "curl -L https://github.com/lewagon/rails-stylesheets/archive/master.zip > stylesheets.zip"
-# run "unzip stylesheets.zip -d app/assets && rm -f stylesheets.zip && rm -f app/assets/rails-stylesheets-master/README.md"
-# run "mv app/assets/rails-stylesheets-master app/assets/stylesheets"
-# run "mv app/assets/stylesheets/application.scss app/assets/stylesheets/application.tailwind.scss"
-# gsub_file(
-#   'app/assets/config/manifest.js',
-#   '//= link_directory ../stylesheets .css',
-#   '//= link_directory ../stylesheets .scss'
-# )
-
-# gsub_file(
-#   'app/assets/stylesheets/application.tailwind.scss',
-#   '@import "font-awesome";',
-#   '@import "font-awesome.css";'
-# )
-
 # NODE_MODULES
 ########################################
 # inject_into_file 'config/initializers/assets.rb', before: '# Precompile additional assets.' do
@@ -135,10 +115,11 @@ after_bundle do
   generate 'annotate:install'
   generate 'rspec:install'
   generate 'stimulus clock'
-  generate(:controller, 'pages', 'home', '--skip-routes', '--no-test-framework')
-  if File.readlines("Gemfile").grep(/pundit/).any?
-    generate 'pundit:install'
-  end
+  generate(:controller, 'pages', 'index', 'home', '--skip-routes', '--no-test-framework')
+  generate 'tailwindcss:install'
+
+  generate 'pundit:install' if File.readlines("Gemfile").grep(/pundit/).any?
+
   # Routes
   ########################################
   route 'root to: "pages#home"'
@@ -157,6 +138,7 @@ after_bundle do
   ########################################
   rails_command 'active_storage:install'
   rails_command 'db:migrate'
+
   # Devise install + user
   ########################################
   # Install Devise
@@ -277,7 +259,7 @@ after_bundle do
 
   # Yarn
   ########################################
-  run 'yarn add esbuild esbuild-sass-plugin chokidar sass @popperjs/core autoprefixer nodemon postcss postcss-cli'
+  run 'yarn add esbuild chokidar sass @popperjs/core autoprefixer nodemon postcss postcss-cli'
   after_bundle do
     run "yarn add chokidar --dev"
   end
