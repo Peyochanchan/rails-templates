@@ -208,6 +208,311 @@ after_bundle do
     file 'app/controllers/application_controller.rb', app_controller_content_without_pundit
   end
 
+  # Assets
+  ########################################
+  inside 'app/assets' do
+    empty_directory 'images'
+    empty_directory 'components'
+    empty_directory 'config'
+  end
+
+  inside 'app/assets/config' do
+    create_file '_colors.css', <<-CSS
+      $red: #c52f24;
+      $blue: #0D6EFD;
+      $yellow: #FFC65A;
+      $orange: #E67E22;
+      $darkgreen: #1EDD88;
+      $gray: #0E0000;
+      $whity: #F4F4F4;
+    CSS
+    create_file '_fonts.css', <<-CSS
+      // Import Google fonts
+      @import url('https://fonts.googleapis.com/css?family=Nunito:400,700|Work+Sans:400,700&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,700;1,400&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
+
+      // Define fonts for body and headers
+      $body-font: 'Roboto', sans-serif;
+      $headers-font: 'Roboto', sans-serif;
+      $logo-font: 'Russo One', sans-serif;
+
+      // To use a font file (.woff) uncomment following lines
+      // @font-face {
+      //   font-family: "Font Name";
+      //   src: font-url('FontFile.eot');
+      //   src: font-url('FontFile.eot?#iefix') format('embedded-opentype'),
+      //        font-url('FontFile.woff') format('woff'),
+      //        font-url('FontFile.ttf') format('truetype')
+      // }
+      // $my-font: "Font Name";
+    CSS
+  end
+
+  inside 'app/assets/components' do
+    create_file '_alert.css', <<-CSS
+      .alert {
+        position: fixed;
+        bottom: 16px;
+        right: 16px;
+        z-index: 1000;
+      }
+    CSS
+    create_file '_avatar.css', <<-CSS
+      .avatar {
+        height: 50px;
+        object-fit: cover;
+        width: 50px;
+        border-radius: 50%;
+      }
+
+      .avatar-large {
+        width: 50px;
+        border-radius: 50%;
+      }
+      .avatar-bordered {
+        width: 50px;
+        border-radius: 50%;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        border: white 1px solid;
+      }
+      .avatar-square {
+        width: 50px;
+        border-radius: 0px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        border: white 1px solid;
+      }
+    CSS
+    create_file '_index.css', <<-CSS
+      @import "alert";
+      @import "avatar";
+      @import "navbar";
+    CSS
+    create_file '_navbar.css', <<-CSS
+      #sign-in-nav {
+        margin: 8px 0px 0px 15px;
+      }
+
+      .logo-nav {
+        flex: 2;
+        display: flex;
+        align-items: center;
+        color: $darkgreen;
+        h4 {
+          margin: 0;
+          font-family: $logo-font;
+        }
+        img {
+          margin-right: 12px;
+          width: 45px;
+        }
+        @media (max-width: 650px) {
+          width: 30px;
+          font-size: 10px;
+          img {
+            margin-right: 8px;
+            width: 30px;
+          }
+        }
+      }
+
+      .navbar-mh, .mobile-menu-mh ul {
+        list-style: none;
+        padding: 0;
+
+        a {
+          text-decoration: none;
+          letter-spacing: 1px;
+        }
+      }
+
+      .navbar-mh {
+        display: none;
+        justify-content: space-between;
+        width: 100%;
+        margin: auto;
+
+        li {
+          text-align: center;
+          #logo-nav {
+            flex: 2;
+          }
+          #lang {
+            flex: 1;
+          }
+          #nav-sign-in {
+            flex: 1;
+          }
+        }
+
+        .dropdown-menu {
+          top: 4% !important;
+          left: 1% !important;
+          box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 12px;
+          transform: translate3d(-12px, 42px, 0px) !important;
+          min-width: 8rem !important;
+          border-radius: 2px !important;
+        }
+
+        a {
+          padding: 8px 16px;
+          display: flex;
+          justify-content: center;
+
+          &.dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: center ;
+            padding: 4px 8px;
+            text-transform: none;
+            i {
+              margin-left: 8px;
+            }
+          }
+
+          &.dropdown-toggle::after {
+            display: none;
+          }
+        }
+
+        @media (min-width: 768px) {
+          display: flex;
+        }
+      }
+
+      .mobile-menu-mh {
+        position: relative;
+        background: transparent;
+        width: 100%;
+
+        .link-nav {
+          font-size: 0.7em;
+        }
+
+        .burger {
+          position: fixed;
+          right: 20px;
+          top: 20px;
+          z-index: 5;
+          cursor: pointer;
+
+          div {
+            color: $whity;
+            width: 36px;
+            height: 7px;
+            background: #FDE2BD;
+            margin-bottom: 4px;
+            transition: all .3s ease
+          }
+        }
+
+        .mask {
+          background: white;
+          top: 0;
+          bottom: 0;
+          right: 0;
+          left: 0;
+          z-index: 2;
+          opacity: 0;
+          transition: opacity .5s ease;
+        }
+
+        ul {
+          position: fixed;
+          z-index: 2;
+          margin: 0;
+          width: 100vw;
+          background: white;
+          padding: 32px;
+          margin-top: -80%;
+          transition: margin-left .5s ease;
+        }
+
+        li {
+          margin-bottom: 8px;
+        }
+
+        a {
+          padding: 2px 8px;
+          font-size: 1.8em;
+        }
+
+        &.show {
+          display: block;
+
+          ul {
+            margin-top: 0;
+          }
+
+          .mask {
+            position: fixed;
+            opacity: 1;
+          }
+
+          .burger {
+            div:nth-child(1) {
+              opacity: 0;
+            }
+
+            div:nth-child(2) {
+              transform: rotate(45deg) translateY(11px);
+            }
+
+            div:nth-child(3) {
+              transform: rotate(-45deg) translateY(-11px);
+            }
+          }
+        }
+
+        @media (min-width: 768px) {
+          display: none;
+        }
+      }
+        a.indent {
+          text-indent: 2em;
+          border: none !important;
+        }
+
+        a.hidden {
+          display: none;
+        }
+
+      // .hide-description {
+      //   display: none;
+      // }
+
+      // @media screen and (max-width: 700px) {
+      //   nav, .navbar {
+      //   height: 150px !important;
+      //     width: 100% !important;
+
+      //   }
+      //   .container {
+      //   display: inline-block;
+      //   justify-content: center !important;
+      //   }
+      //   .container:first-child {
+      //     border: 2px solid;
+      //   }
+      // }
+    CSS
+  end
+
+  inside 'app/assets/stylesheets' do
+    empty_directory 'pages'
+  end
+  create_file 'app/assets/stylesheets/pages/_home.css'
+  create_file 'app/assets/stylesheets/pages/_index.css'
+  append_to_file 'app/assets/stylesheets/pages/_index', <<-CSS
+    @import "home";
+  CSS
+  append_to_file 'app/assets/stylesheets/application.tailwind.css', <<-CSS
+    @import "config/fonts";
+    @import "config/colors";
+    @import "components/index";
+    @import "pages/index";
+
+  CSS
   # Pages Controller
   ########################################
   inject_into_file 'app/controllers/pages_controller.rb',
@@ -223,7 +528,7 @@ after_bundle do
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock_controller.js >  app/javascript/controllers/clock_controller.js"
 
 
-  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.scss > app/assets/stylesheets/pages/_home.scss"
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.css > app/assets/stylesheets/pages/_home.css"
 
   append_file 'app/assets/stylesheets/pages/_index.scss', "@import 'home';"
 
