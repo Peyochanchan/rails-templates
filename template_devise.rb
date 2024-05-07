@@ -530,7 +530,7 @@ after_bundle do
 
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.css > app/assets/stylesheets/pages/_home.css"
 
-  append_file 'app/assets/stylesheets/pages/_index.scss', "@import 'home';"
+  append_file 'app/assets/stylesheets/pages/_index.css', "@import 'home';"
 
   # migrate + devise views
   ########################################
