@@ -209,7 +209,6 @@ after_bundle do
 
   # Assets
   ########################################
-  remove_file 'app/assets/stylesheets/application.css'
 
   inside 'app/assets' do
     empty_directory 'images'
@@ -528,6 +527,8 @@ after_bundle do
   insert_into_file 'tailwind.config.js', before: "],\n  theme: {" do
     "  './app/assets/stylesheets/**/*.css',\n"
   end
+
+  remove_file 'app/assets/stylesheets/application.css'
   # gsub_file(
   #   'node_modules/bootstrap/scss/_functions.scss',
   #   '@return mix(rgba($foreground, 1), $background, opacity($foreground) * 100);',
