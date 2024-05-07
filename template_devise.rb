@@ -528,6 +528,8 @@ after_bundle do
     "  './app/assets/stylesheets/**/*.css',\n"
   end
 
+  append_to_file 'app/assets/config/manifest.js', '//= link application.tailwind.css'
+
   remove_file 'app/assets/stylesheets/application.css'
   # gsub_file(
   #   'node_modules/bootstrap/scss/_functions.scss',
