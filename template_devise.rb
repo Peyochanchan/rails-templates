@@ -10,11 +10,11 @@ end
 remove_file 'Gemfile'
 run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/Gemfile > Gemfile"
 
-inject_into_file 'Gemfile', after: "gem 'simple_form', github: 'heartcombo/simple_form'\n" do
-  <<~'RUBY'
-    gem 'devise'
-  RUBY
-end
+# inject_into_file 'Gemfile', after: "gem 'simple_form', github: 'heartcombo/simple_form'\n" do
+#   <<~'RUBY'
+#     gem 'devise'
+#   RUBY
+# end
 
 if yes?('Would you like to add pundit?[yes | no]')
   inject_into_file 'Gemfile', after: "gem 'devise'\n" do
@@ -32,8 +32,8 @@ end
 if yes?('Would you like to add activeadmin?[yes | no]')
   inject_into_file 'Gemfile', after: "gem 'devise'\n" do
     <<~'RUBY'
-      gem 'activeadmin', github: 'activeadmin/activeadmin', branch: 'master'
-      gem 'inherited_resources', github: 'activeadmin/inherited_resources'
+      gem 'activeadmin'
+      gem 'inherited_resources'
     RUBY
   end
 end
@@ -45,7 +45,7 @@ run 'rm -rf vendor'
 run "curl -L https://github.com/lewagon/rails-stylesheets/archive/master.zip > stylesheets.zip"
 run "unzip stylesheets.zip -d app/assets && rm -f stylesheets.zip && rm -f app/assets/rails-stylesheets-master/README.md"
 run "mv app/assets/rails-stylesheets-master app/assets/stylesheets"
-
+run "mv app/assets/stylesheets/application.scss app/assets/stylesheets/application.tailwind.scss"
 gsub_file(
   'app/assets/config/manifest.js',
   '//= link_directory ../stylesheets .css',
@@ -53,7 +53,7 @@ gsub_file(
 )
 
 gsub_file(
-  'app/assets/stylesheets/application.scss',
+  'app/assets/stylesheets/application.tailwind.scss',
   '@import "font-awesome";',
   '@import "font-awesome.css";'
 )
@@ -131,7 +131,7 @@ after_bundle do
   # Generators: db + simple form + pages controller
   ########################################
   rails_command 'db:drop db:create db:migrate'
-  generate('simple_form:install', '--bootstrap')
+  # generate('simple_form:install', '--bootstrap')
   generate 'annotate:install'
   generate 'rspec:install'
   generate 'stimulus clock'
@@ -156,10 +156,7 @@ after_bundle do
   # ACTIVE STORAGE
   ########################################
   rails_command 'active_storage:install'
-
-  environment 'config.active_storage.service = :cloudinary',
-              env: 'development'
-
+  rails_command 'db:migrate'
   # Devise install + user
   ########################################
   # Install Devise
@@ -252,16 +249,16 @@ after_bundle do
   ########################################
   rails_command 'db:migrate'
   generate('devise:views')
-  gsub_file(
-    'app/views/devise/registrations/new.html.erb',
-    "<%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>",
-    "<%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name), data: { turbo: :false }) do |f| %>"
-  )
-  gsub_file(
-    "app/views/devise/sessions/new.html.erb",
-    "<%= simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>",
-    "<%= simple_form_for(resource, as: resource_name, url: session_path(resource_name), data: { turbo: :false }) do |f| %>"
-  )
+  # gsub_file(
+  #   'app/views/devise/registrations/new.html.erb',
+  #   "<%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>",
+  #   "<%= simple_form_for(resource, as: resource_name, url: registration_path(resource_name), data: { turbo: :false }) do |f| %>"
+  # )
+  # gsub_file(
+  #   "app/views/devise/sessions/new.html.erb",
+  #   "<%= simple_form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>",
+  #   "<%= simple_form_for(resource, as: resource_name, url: session_path(resource_name), data: { turbo: :false }) do |f| %>"
+  # )
   link_to = <<~HTML
     <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
   HTML
@@ -280,28 +277,32 @@ after_bundle do
 
   # Yarn
   ########################################
-  run 'yarn add esbuild@0.15.15 bootstrap chokidar sass @popperjs/core esbuild-sass-plugin'
-
+  run 'yarn add esbuild chokidar sass @popperjs/core nodemon postcss-cli'
+  after_bundle do
+    run "yarn add chokidar --dev"
+  end
   # ESBUILD CONFIG
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
   gsub_file(
     'package.json',
-    '"build": "esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=assets"',
-    '"build": "esbuild app/javascript/*.* --bundle --outdir=app/assets/builds",
-    "start": "node esbuild-dev.config.js",
-    "build:css": "sass ./app/assets/stylesheets/application.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules"'
+    'build:css": "tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --minify',
+    '"start": "node esbuild-dev.config.js",
+    "build:css:compile": "sass ./app/assets/stylesheets/application.tailwind.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules",
+    "build:css:prefix": "postcss ./app/assets/builds/application.css --use=autoprefixer --output=./app/assets/builds/application.css",
+    "build:css": "yarn build:css:compile && yarn build:css:prefix",
+    "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext scss --exec \"yarn build:css\""'
   )
   run 'rm -f app/assets/builds/application.js.map'
 
-  gsub_file(
-    'node_modules/bootstrap/scss/_functions.scss',
-    '@return mix(rgba($foreground, 1), $background, opacity($foreground) * 100);',
-    '@return mix(rgba($foreground, 1%), $background, opacity($foreground) * 100%);'
-  )
+  # gsub_file(
+  #   'node_modules/bootstrap/scss/_functions.scss',
+  #   '@return mix(rgba($foreground, 1), $background, opacity($foreground) * 100);',
+  #   '@return mix(rgba($foreground, 1%), $background, opacity($foreground) * 100%);'
+  # )
 
-  append_file 'app/javascript/application.js', <<~JS
-    import "bootstrap"
-  JS
+  # append_file 'app/javascript/application.js', <<~JS
+  #   import "bootstrap"
+  # JS
 
   # PROCFILE
   run 'rm Procfile.dev'
