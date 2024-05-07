@@ -524,7 +524,7 @@ after_bundle do
   )
   run 'rm -f app/assets/builds/application.js.map'
 
-  insert_into_file 'tailwind.config.js', before: "],\n  theme: {" do
+  insert_into_file 'config/tailwind.config.js', before: "],\n  theme: {" do
     "  './app/assets/stylesheets/**/*.css',\n"
   end
 
