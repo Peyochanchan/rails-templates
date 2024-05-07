@@ -48,12 +48,21 @@ gem "sassc-rails"
 
 gem 'devise', '~> 4.9', '>= 4.9.4'
 gem 'devise-i18n'
-gem 'pundit', '~> 2.3', '>= 2.3.1'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
-  gem 'rspec-rails', '~> 6.1.0'
+  # Helper pour avoir les informations des modèles dans les fichiers
+  gem 'annotate', '~> 3.2'
+  # Pry pour débuggage
+  gem "pry-byebug"
+  gem "pry-rails"
+  gem "byebug"
+
+  # Tests + Factory Bot pour les tests
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "database_cleaner"
 end
 
 group :development do
@@ -71,4 +80,11 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  gem "webdrivers" # 5.2
+
+  # Enregistre screenshots lors des tests et erreurs
+  gem "launchy"
+
+  # Helper pour les tests Models (et Pundit)
+  gem "shoulda-matchers"
 end

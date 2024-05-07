@@ -19,7 +19,7 @@ run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main
 if yes?('Would you like to add pundit?[yes | no]')
   inject_into_file 'Gemfile', after: "gem 'devise'\n" do
     <<~'RUBY'
-        gem "pundit"
+        gem 'pundit', '~> 2.3', '>= 2.3.1'
     RUBY
   end
   inject_into_file 'Gemfile', after: "gem 'warden-rspec-rails'\n" do
@@ -40,31 +40,31 @@ end
 
 # STYLESHEETS
 ########################################
-run 'rm -rf app/assets/stylesheets'
-run 'rm -rf vendor'
-run "curl -L https://github.com/lewagon/rails-stylesheets/archive/master.zip > stylesheets.zip"
-run "unzip stylesheets.zip -d app/assets && rm -f stylesheets.zip && rm -f app/assets/rails-stylesheets-master/README.md"
-run "mv app/assets/rails-stylesheets-master app/assets/stylesheets"
-run "mv app/assets/stylesheets/application.scss app/assets/stylesheets/application.tailwind.scss"
-gsub_file(
-  'app/assets/config/manifest.js',
-  '//= link_directory ../stylesheets .css',
-  '//= link_directory ../stylesheets .scss'
-)
+# run 'rm -rf app/assets/stylesheets'
+# run 'rm -rf vendor'
+# run "curl -L https://github.com/lewagon/rails-stylesheets/archive/master.zip > stylesheets.zip"
+# run "unzip stylesheets.zip -d app/assets && rm -f stylesheets.zip && rm -f app/assets/rails-stylesheets-master/README.md"
+# run "mv app/assets/rails-stylesheets-master app/assets/stylesheets"
+# run "mv app/assets/stylesheets/application.scss app/assets/stylesheets/application.tailwind.scss"
+# gsub_file(
+#   'app/assets/config/manifest.js',
+#   '//= link_directory ../stylesheets .css',
+#   '//= link_directory ../stylesheets .scss'
+# )
 
-gsub_file(
-  'app/assets/stylesheets/application.tailwind.scss',
-  '@import "font-awesome";',
-  '@import "font-awesome.css";'
-)
+# gsub_file(
+#   'app/assets/stylesheets/application.tailwind.scss',
+#   '@import "font-awesome";',
+#   '@import "font-awesome.css";'
+# )
 
 # NODE_MODULES
 ########################################
-inject_into_file 'config/initializers/assets.rb', before: '# Precompile additional assets.' do
-  <<~RUBY
-    Rails.application.config.assets.paths << Rails.root.join("node_modules")
-  RUBY
-end
+# inject_into_file 'config/initializers/assets.rb', before: '# Precompile additional assets.' do
+#   <<~RUBY
+#     Rails.application.config.assets.paths << Rails.root.join("node_modules")
+#   RUBY
+# end
 
 # LAYOUT
 ########################################
@@ -277,7 +277,7 @@ after_bundle do
 
   # Yarn
   ########################################
-  run 'yarn add esbuild chokidar sass @popperjs/core nodemon postcss-cli'
+  run 'yarn add esbuild esbuild-sass-plugin chokidar sass @popperjs/core autoprefixer nodemon postcss postcss-cli'
   after_bundle do
     run "yarn add chokidar --dev"
   end
@@ -293,6 +293,12 @@ after_bundle do
       "build:css:prefix": "postcss ./app/assets/builds/application.css --use=autoprefixer --output=./app/assets/builds/application.css",
       "build:css": "yarn build:css:compile && yarn build:css:prefix",
       "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext scss --exec \\"yarn build:css\\""
+    },
+    "browserslist": [
+      "defaults"
+    ],
+    "devDependencies": {
+      "chokidar": "^3.6.0"
     }'
   )
   run 'rm -f app/assets/builds/application.js.map'
