@@ -209,6 +209,8 @@ after_bundle do
 
   # Assets
   ########################################
+  rm 'app/assets/stylesheets/application.css'
+
   inside 'app/assets' do
     empty_directory 'images'
     empty_directory 'components'
@@ -216,7 +218,7 @@ after_bundle do
   end
 
   inside 'app/assets/components' do
-    create_file '_alert.css', <<-CSS
+    create_file 'alert.css', <<-CSS
       .alert {
         position: fixed;
         bottom: 16px;
@@ -224,7 +226,7 @@ after_bundle do
         z-index: 1000;
       }
     CSS
-    create_file '_avatar.css', <<-CSS
+    create_file 'avatar.css', <<-CSS
       .avatar {
         height: 50px;
         object-fit: cover;
@@ -249,12 +251,12 @@ after_bundle do
         border: white 1px solid;
       }
     CSS
-    create_file '_index.css', <<-CSS
+    create_file 'index.css', <<-CSS
       @import "alert";
       @import "avatar";
       @import "navbar";
     CSS
-    create_file '_navbar.css', <<-CSS
+    create_file 'navbar.css', <<-CSS
       #sign-in-nav {
         margin: 8px 0px 0px 15px;
       }
@@ -448,9 +450,9 @@ after_bundle do
   inside 'app/assets/stylesheets' do
     empty_directory 'pages'
   end
-  create_file 'app/assets/stylesheets/pages/_home.css'
-  create_file 'app/assets/stylesheets/pages/_index.css'
-  append_to_file 'app/assets/stylesheets/pages/_index.css', <<-CSS
+  create_file 'app/assets/stylesheets/pages/home.css'
+  create_file 'app/assets/stylesheets/pages/index.css'
+  append_to_file 'app/assets/stylesheets/pages/index.css', <<-CSS
     @import "home";
   CSS
   append_to_file 'app/assets/stylesheets/application.tailwind.css', <<-CSS
@@ -472,10 +474,7 @@ after_bundle do
   run 'rm app/javascript/controllers/clock_controller.js'
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock_controller.js >  app/javascript/controllers/clock_controller.js"
 
-
-  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.css > app/assets/stylesheets/pages/_home.css"
-
-  # append_file 'app/assets/stylesheets/pages/_index.css', "@import 'home';"
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.css > app/assets/stylesheets/pages/home.css"
 
   # migrate + devise views
   ########################################
@@ -526,6 +525,9 @@ after_bundle do
   )
   run 'rm -f app/assets/builds/application.js.map'
 
+  insert_into_file 'tailwind.config.js', before: "],\n  theme: {" do
+    "  './app/assets/stylesheets/**/*.css',\n"
+  end
   # gsub_file(
   #   'node_modules/bootstrap/scss/_functions.scss',
   #   '@return mix(rgba($foreground, 1), $background, opacity($foreground) * 100);',
