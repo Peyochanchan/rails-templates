@@ -576,10 +576,10 @@ after_bundle do
     '"scripts": {
       "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
       "start": "node esbuild-dev.config.js",
-      "build:css:compile": "sass ./app/assets/stylesheets/application.tailwind.scss:./app/assets/builds/application.css --no-source-map --load-path=node_modules",
+      "build:css:compile": "sass ./app/assets/stylesheets/application.tailwind.css:./app/assets/builds/application.css --no-source-map --load-path=node_modules",
       "build:css:prefix": "postcss ./app/assets/builds/application.css --use=autoprefixer --output=./app/assets/builds/application.css",
       "build:css": "yarn build:css:compile && yarn build:css:prefix",
-      "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext scss --exec \\"yarn build:css\\""
+      "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext css --exec \\"yarn build:css\\""
     },
     "browserslist": [
       "defaults"
