@@ -116,7 +116,6 @@ after_bundle do
   generate 'rspec:install'
   generate 'stimulus clock'
   generate(:controller, 'pages', 'index', 'home', '--skip-routes', '--no-test-framework')
-  rails_command 'tailwindcss:install'
 
   generate 'pundit:install' if File.readlines("Gemfile").grep(/pundit/).any?
 
@@ -214,39 +213,6 @@ after_bundle do
     empty_directory 'images'
     empty_directory 'components'
     empty_directory 'config'
-  end
-
-  inside 'app/assets/config' do
-    create_file '_colors.css', <<-CSS
-      $red: #c52f24;
-      $blue: #0D6EFD;
-      $yellow: #FFC65A;
-      $orange: #E67E22;
-      $darkgreen: #1EDD88;
-      $gray: #0E0000;
-      $whity: #F4F4F4;
-    CSS
-    create_file '_fonts.css', <<-CSS
-      // Import Google fonts
-      @import url('https://fonts.googleapis.com/css?family=Nunito:400,700|Work+Sans:400,700&display=swap');
-      @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,700;1,400&display=swap');
-      @import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
-
-      // Define fonts for body and headers
-      $body-font: 'Roboto', sans-serif;
-      $headers-font: 'Roboto', sans-serif;
-      $logo-font: 'Russo One', sans-serif;
-
-      // To use a font file (.woff) uncomment following lines
-      // @font-face {
-      //   font-family: "Font Name";
-      //   src: font-url('FontFile.eot');
-      //   src: font-url('FontFile.eot?#iefix') format('embedded-opentype'),
-      //        font-url('FontFile.woff') format('woff'),
-      //        font-url('FontFile.ttf') format('truetype')
-      // }
-      // $my-font: "Font Name";
-    CSS
   end
 
   inside 'app/assets/components' do
@@ -476,25 +442,6 @@ after_bundle do
         a.hidden {
           display: none;
         }
-
-      // .hide-description {
-      //   display: none;
-      // }
-
-      // @media screen and (max-width: 700px) {
-      //   nav, .navbar {
-      //   height: 150px !important;
-      //     width: 100% !important;
-
-      //   }
-      //   .container {
-      //   display: inline-block;
-      //   justify-content: center !important;
-      //   }
-      //   .container:first-child {
-      //     border: 2px solid;
-      //   }
-      // }
     CSS
   end
 
@@ -507,8 +454,6 @@ after_bundle do
     @import "home";
   CSS
   append_to_file 'app/assets/stylesheets/application.tailwind.css', <<-CSS
-    @import "config/fonts";
-    @import "config/colors";
     @import "components/index";
     @import "pages/index";
 
@@ -530,7 +475,7 @@ after_bundle do
 
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.css > app/assets/stylesheets/pages/_home.css"
 
-  append_file 'app/assets/stylesheets/pages/_index.css', "@import 'home';"
+  # append_file 'app/assets/stylesheets/pages/_index.css', "@import 'home';"
 
   # migrate + devise views
   ########################################
@@ -599,7 +544,6 @@ after_bundle do
   # append_file 'app/javascript/application.js', <<~JS
   #   import "bootstrap"
   # JS
-
   # PROCFILE
   run 'rm Procfile.dev'
   file 'Procfile.dev',
@@ -609,6 +553,7 @@ after_bundle do
       js: yarn start --watch
     RUBY
 
+  rails_command 'tailwindcss:install'
   # HEROKU
   ########################################
   run 'bundle lock --add-platform x86_64-linux'
