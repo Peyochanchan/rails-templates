@@ -209,7 +209,7 @@ after_bundle do
 
   # Assets
   ########################################
-  rm 'app/assets/stylesheets/application.css'
+  remove_file 'app/assets/stylesheets/application.css'
 
   inside 'app/assets' do
     empty_directory 'images'
