@@ -503,7 +503,7 @@ after_bundle do
   end
   create_file 'app/assets/stylesheets/pages/_home.css'
   create_file 'app/assets/stylesheets/pages/_index.css'
-  append_to_file 'app/assets/stylesheets/pages/_index', <<-CSS
+  append_to_file 'app/assets/stylesheets/pages/_index.css', <<-CSS
     @import "home";
   CSS
   append_to_file 'app/assets/stylesheets/application.tailwind.css', <<-CSS
