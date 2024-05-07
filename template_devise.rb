@@ -116,7 +116,7 @@ after_bundle do
   generate 'rspec:install'
   generate 'stimulus clock'
   generate(:controller, 'pages', 'index', 'home', '--skip-routes', '--no-test-framework')
-  generate 'tailwindcss:install'
+  rails_command 'tailwindcss:install'
 
   generate 'pundit:install' if File.readlines("Gemfile").grep(/pundit/).any?
 
