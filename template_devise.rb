@@ -23,7 +23,7 @@ gsub_file(
   'app/views/layouts/application.html.erb',
   '<meta name="viewport" content="width=device-width,initial-scale=1">',
   '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <script src="https://kit.fontawesome.com/d39b0756a2.js" crossorigin="anonymous"></script>'
+   <script src="https://kit.fontawesome.com/d39b0756a2.js" crossorigin="anonymous"></script>'
 
 )
 
@@ -77,7 +77,7 @@ end
 ########################################
 markdown_file_content = <<~MARKDOWN
   Rails app generated with template inspired by \n
-  by Peyochanchan for Rails 7 / esbuild / Tailwind / Devise
+  by Peyochanchan for Rails 7 / Esbuild / Tailwind / Devise / Pundit
 
 MARKDOWN
 file 'README.md', markdown_file_content, force: true
@@ -216,28 +216,25 @@ after_bundle do
   # Assets
   ########################################
 
-  inside 'app/assets' do
-    empty_directory 'images'
-  end
-
   inside 'app/assets/stylesheets' do
     empty_directory 'config'
     empty_directory 'components'
   end
 
-  create_file 'app/assets/stylesheets/components/index.css' do <<~CSS
-    @import "components/clock";
+  create_file 'app/assets/stylesheets/components/index.css' do
+    <<~CSS
+      @import "clock";
     CSS
   end
 
   append_to_file 'app/assets/stylesheets/application.tailwind.css', <<-CSS
-  @import "components/index";
+    @import "components/index";
+
+    h1 {
+      color: theme('colors.green.500');
+      font-family: "Roboto", sans-serif;
+    }
   CSS
-  # Pages Controller
-  ########################################
-  # inject_into_file 'app/controllers/pages_controller.rb',
-  #                  "  skip_before_action :authenticate_user!, only: :home \n\n",
-  #                  after: "class PagesController < ApplicationController\n"
 
   # Home Page
   ########################################
@@ -278,7 +275,7 @@ after_bundle do
 
   # ESBUILD CONFIG
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
-  insert_into_file 'package.json', "  \"type\": \"module\",\n", after: "\"private\": \"true\",\n"
+  insert_into_file 'package.json', "  \"type\": \"module\",\n", after: "\"private\": true,\n"
   gsub_file(
     'package.json',
     /"scripts": \{.*?\}/m,
