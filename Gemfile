@@ -50,6 +50,7 @@ gem "font-awesome-sass", "~> 6.1"
 gem 'devise', '~> 4.9', '>= 4.9.4'
 gem 'devise-i18n'
 
+gem 'pundit', '~> 2.3', '>= 2.3.1'
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
@@ -88,4 +89,5 @@ group :test do
 
   # Helper pour les tests Models (et Pundit)
   gem "shoulda-matchers"
+  gem 'pundit-matchers', '~> 1.7.0'
 end

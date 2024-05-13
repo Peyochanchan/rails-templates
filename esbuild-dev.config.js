@@ -38,7 +38,6 @@ if (process.argv.includes('--watch')) {
   chokidar.watch([
     "app/javascript/**/*.js",
     "app/views/**/*.html.erb",
-    "app/assets/builds/application.css",
     "app/assets/builds/tailwind.css",
     "app/assets/stylesheets/application.tailwind.css"
   ]).on('all', (event, path) => {

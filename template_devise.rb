@@ -10,25 +10,6 @@ end
 remove_file 'Gemfile'
 run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/Gemfile > Gemfile"
 
-# inject_into_file 'Gemfile', after: "gem 'simple_form', github: 'heartcombo/simple_form'\n" do
-#   <<~'RUBY'
-#     gem 'devise'
-#   RUBY
-# end
-
-if yes?('Would you like to add pundit?[yes | no]')
-  inject_into_file 'Gemfile', after: "gem 'devise-i18n'\n" do
-    <<~RUBY
-      gem 'pundit', '~> 2.3', '>= 2.3.1'
-    RUBY
-  end
-  inject_into_file 'Gemfile', after: "gem 'shoulda-matchers'\n" do
-    <<~RUBY
-      gem 'pundit-matchers', '~> 1.7.0'
-    RUBY
-  end
-end
-
 if yes?('Would you like to add activeadmin?[yes | no]')
   inject_into_file 'Gemfile', after: "gem 'devise'\n" do
     <<~RUBY
@@ -41,7 +22,9 @@ end
 gsub_file(
   'app/views/layouts/application.html.erb',
   '<meta name="viewport" content="width=device-width,initial-scale=1">',
-  '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">'
+  '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <script src="https://kit.fontawesome.com/d39b0756a2.js" crossorigin="anonymous"></script>'
+
 )
 
 # Flashes
@@ -84,7 +67,7 @@ file 'app/views/shared/_flashes.html.erb', <<~HTML
   </script>
 HTML
 
-inject_into_file 'app/views/layouts/application.html.erb', after: '<body>' do
+inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
   <<~HTML
     <%= render "shared/flashes" %>
   HTML
@@ -141,7 +124,8 @@ after_bundle do
 
   # Tailwind Installation
   ########################################
-  rails_command 'tailwindcss:install'
+  run("echo yes | bin/rails tailwindcss:install")
+
 
   # Gitignore
   ########################################
@@ -190,9 +174,7 @@ after_bundle do
       before_action :authenticate_user!, if: :devise_controller?
       before_action :configure_permitted_parameters, if: :devise_controller?
       include Pundit::Authorization
-
-      after_action :verify_authorized, except: :index, unless: :skip_pundit?
-      after_action :verify_policy_scoped, only: :index, unless: :skip_pundit?
+      after_action :verify_pundit_authorization, unless: :devise_controller?
 
 
       def configure_permitted_parameters
@@ -209,8 +191,12 @@ after_bundle do
       #   redirect_to(root_path)
       # end
 
-      def skip_pundit?
-        devise_controller? || params[:controller] =~ /(^(rails_)?admin)|(^pages$)/
+      def verify_pundit_authorization
+        if action_name == "index"
+          verify_policy_scoped if params[:controller] != "pages"
+        else
+          verify_authorized
+        end
       end
     end
   RUBY
@@ -232,33 +218,32 @@ after_bundle do
 
   inside 'app/assets' do
     empty_directory 'images'
-    empty_directory 'components'
-    empty_directory 'config'
   end
-
-  create_file 'app/assets/stylesheets/components/index.css'
 
   inside 'app/assets/stylesheets' do
-    empty_directory 'pages'
+    empty_directory 'config'
+    empty_directory 'components'
   end
-  create_file 'app/assets/stylesheets/pages/index.css'
+
+  create_file 'app/assets/stylesheets/components/index.css' do <<~CSS
+    @import "components/clock";
+    CSS
+  end
 
   append_to_file 'app/assets/stylesheets/application.tailwind.css', <<-CSS
-    @import "components/index";
-    @import "pages/index";
+  @import "components/index";
   CSS
   # Pages Controller
   ########################################
-  inject_into_file 'app/controllers/pages_controller.rb',
-                   "  skip_before_action :authenticate_user!, only: :home \n\n",
-                   after: "class PagesController < ApplicationController\n"
+  # inject_into_file 'app/controllers/pages_controller.rb',
+  #                  "  skip_before_action :authenticate_user!, only: :home \n\n",
+  #                  after: "class PagesController < ApplicationController\n"
 
   # Home Page
   ########################################
   generate 'stimulus clock'
-  create_file 'app/assets/stylesheets/pages/clock.css'
-  run 'rm app/views/pages/home.html.erb'
-  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.html.erb > app/views/pages/home.html.erb"
+  run 'rm app/views/pages/index.html.erb'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/index.html.erb > app/views/pages/index.html.erb"
 
   run 'rm app/javascript/controllers/clock_controller.js'
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock_controller.js >  app/javascript/controllers/clock_controller.js"
@@ -293,6 +278,7 @@ after_bundle do
 
   # ESBUILD CONFIG
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
+  insert_into_file 'package.json', "  \"type\": \"module\",\n", after: "\"private\": \"true\",\n"
   gsub_file(
     'package.json',
     /"scripts": \{.*?\}/m,
@@ -301,7 +287,13 @@ after_bundle do
       "start": "node esbuild-dev.config.js",
       "build:css": "tailwindcss --postcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css",
       "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext css --exec \"yarn build:css\""
-    },'
+    },
+    "browserslist": [
+      "defaults"
+    ],
+    "devDependencies": {
+      "chokidar": "^3.6.0"
+    }'
   )
   run 'rm -f app/assets/builds/application.js.map'
 
@@ -332,12 +324,24 @@ after_bundle do
     JS
   end
 
-  remove_file 'config/tailwind.config.js'
-  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/config/tailwind.config.js > tailwind.config.js"
+  tailwind_config_url = "https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/tailwind.config.js"
+  local_file_path = 'config/tailwind.config.js'
+  remote_content = URI.open(tailwind_config_url).read
+  create_file local_file_path, remote_content, force: true
+
+  file_path = 'app/assets/stylesheets/application.tailwind.css'
+    old_content = '@tailwind base;
+                   @tailwind components;
+                   @tailwind utilities;'
+    new_content = '@import "tailwindcss/base";
+                   @import "tailwindcss/components";
+                   @import "tailwindcss/utilities";'
+
+    gsub_file file_path, old_content, new_content if File.exist?(file_path)
   # Manifest & Assets
   #########################################
   append_to_file 'app/assets/config/manifest.js', '//= link tailwind.css'
-  remove_file 'app/assets/stylesheets/application.css'
+  # remove_file 'app/assets/stylesheets/application.css'
 
   # Procfile
   ########################################
