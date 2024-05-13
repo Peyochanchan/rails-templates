@@ -1,0 +1,30 @@
+<<div class="big-home">
+  <div class="flex justify-center my-10">
+    <p class="text-center text-3xl text-white bg-green-500 hover:bg-black py-2 w-64 rounded-lg">Hello World</p>
+  </div>
+
+
+  <div class="border-rouge"></div>
+
+  <div>
+    <h1 class="text-black">Welcome to "<%= Rails.app_class.module_parent_name %>"</h1>
+  </div>
+
+  <div class="clock" data-controller="clock"
+   data-content-loader-refresh-interval-value="1000">
+    <div class="clock-face">
+      <div class="clock-round-middle"></div>
+      <div class="hand hour" data-clock-target="hour"></div>
+      <div class="hand min" data-clock-target="min"></div>
+      <div class="hand second" data-clock-target="second"></div>
+    </div>
+  </div>
+
+  <div class="ror-version">
+    <h1>Your New Rails App is ready</h1>
+    <p>Rails <%= Rails.version %> - Ruby <%= RUBY_VERSION %></p>
+  </div>
+
+  <div class="border-rouge"></div>
+
+</div>
