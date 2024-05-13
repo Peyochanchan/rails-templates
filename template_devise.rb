@@ -73,6 +73,10 @@ inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
   HTML
 end
 
+remove_line = <<~HTML
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+HTML
+gsub_file 'app/views/layouts/application.html.erb', remove_line, ''
 # README
 ########################################
 markdown_file_content = <<~MARKDOWN
@@ -227,14 +231,19 @@ after_bundle do
     CSS
   end
 
-  append_to_file 'app/assets/stylesheets/application.tailwind.css', <<-CSS
-    @import "components/index";
+  application_tailwind_css_content = <<-CSS
+  @import "tailwindcss/base";
+  @import "tailwindcss/components";
+  @import "tailwindcss/utilities";
+  @import "components/index";
 
-    h1 {
-      color: theme('colors.green.500');
-      font-family: "Roboto", sans-serif;
-    }
+  h1 {
+    color: theme('colors.green.500');
+    font-family: "Roboto", sans-serif;
+  }
   CSS
+
+  file 'app/assets/stylesheets/application.tailwind.css', application_tailwind_css_content, force: true
 
   # Home Page
   ########################################
@@ -252,16 +261,16 @@ after_bundle do
   rails_command 'db:migrate'
   generate('devise:views')
 
-  link_to = <<~HTML
-    <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
-  HTML
-  button_to = <<~HTML
-    <div class="d-flex align-items-center">
-      <div>Unhappy?</div>
-      <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: "btn btn-link" %>
-    </div>
-  HTML
-  gsub_file('app/views/devise/registrations/edit.html.erb', link_to, button_to)
+  # link_to = <<~HTML
+  #   <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
+  # HTML
+  # button_to = <<~HTML
+  #   <div class="d-flex align-items-center">
+  #     <div>Unhappy?</div>
+  #     <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: "btn btn-link" %>
+  #   </div>
+  # HTML
+  # gsub_file('app/views/devise/registrations/edit.html.erb', link_to, button_to)
 
   # Environments
   ########################################
@@ -282,7 +291,7 @@ after_bundle do
     '"scripts": {
       "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
       "start": "node esbuild-dev.config.js",
-      "build:css": "tailwindcss --postcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css",
+      "build:css": "tailwindcss --postcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/tailwind.css",
       "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext css --exec \"yarn build:css\""
     },
     "browserslist": [
@@ -326,19 +335,11 @@ after_bundle do
   remote_content = URI.open(tailwind_config_url).read
   create_file local_file_path, remote_content, force: true
 
-  file_path = 'app/assets/stylesheets/application.tailwind.css'
-    old_content = '@tailwind base;
-                   @tailwind components;
-                   @tailwind utilities;'
-    new_content = '@import "tailwindcss/base";
-                   @import "tailwindcss/components";
-                   @import "tailwindcss/utilities";'
-
-    gsub_file file_path, old_content, new_content if File.exist?(file_path)
   # Manifest & Assets
   #########################################
   append_to_file 'app/assets/config/manifest.js', '//= link tailwind.css'
-  # remove_file 'app/assets/stylesheets/application.css'
+  remove_file 'app/assets/stylesheets/application.css'
+  remove_file 'app/assets/builds/application.css'
 
   # Procfile
   ########################################

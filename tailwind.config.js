@@ -27,9 +27,7 @@ export default {
     //   yellow: colors.amber,
     //   pink: colors.fuchsia,
     // },
-    extend: {
-      // You can extend the theme here
-    },
+    extend: {},
   },
   plugins: [
     formsPlugin,
