@@ -1,7 +1,7 @@
-const esbuild = require('esbuild');
-const chokidar = require('chokidar');
-const http = require('http');
-const path = require('path');
+import esbuild from 'esbuild';
+import chokidar from 'chokidar';
+import * as http from 'http';
+import * as path from 'path';
 
 // Setup for hot-reloading server
 const clients = [];
@@ -38,7 +38,9 @@ if (process.argv.includes('--watch')) {
   chokidar.watch([
     "app/javascript/**/*.js",
     "app/views/**/*.html.erb",
-    "app/assets/builds/application.css"
+    "app/assets/builds/application.css",
+    "app/assets/builds/tailwind.css",
+    "app/assets/stylesheets/application.tailwind.css"
   ]).on('all', (event, path) => {
     console.log(`Detected change in ${path}, rebuilding...`);
     build().then(() => {

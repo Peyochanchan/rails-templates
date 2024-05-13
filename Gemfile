@@ -45,6 +45,7 @@ gem "bootsnap", require: false
 gem "image_processing", "~> 1.2"
 gem 'tailwindcss-rails'
 gem "sassc-rails"
+gem "font-awesome-sass", "~> 6.1"
 
 gem 'devise', '~> 4.9', '>= 4.9.4'
 gem 'devise-i18n'

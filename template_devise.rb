@@ -17,37 +17,26 @@ run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main
 # end
 
 if yes?('Would you like to add pundit?[yes | no]')
-  inject_into_file 'Gemfile', after: "gem 'devise'\n" do
-    <<~'RUBY'
-        gem 'pundit', '~> 2.3', '>= 2.3.1'
+  inject_into_file 'Gemfile', after: "gem 'devise-i18n'\n" do
+    <<~RUBY
+      gem 'pundit', '~> 2.3', '>= 2.3.1'
     RUBY
   end
-  inject_into_file 'Gemfile', after: "gem 'warden-rspec-rails'\n" do
-    <<~'RUBY'
-        gem 'pundit-matchers', '~> 1.7.0'
+  inject_into_file 'Gemfile', after: "gem 'shoulda-matchers'\n" do
+    <<~RUBY
+      gem 'pundit-matchers', '~> 1.7.0'
     RUBY
   end
 end
 
 if yes?('Would you like to add activeadmin?[yes | no]')
   inject_into_file 'Gemfile', after: "gem 'devise'\n" do
-    <<~'RUBY'
+    <<~RUBY
       gem 'activeadmin'
       gem 'inherited_resources'
     RUBY
   end
 end
-
-# NODE_MODULES
-########################################
-# inject_into_file 'config/initializers/assets.rb', before: '# Precompile additional assets.' do
-#   <<~RUBY
-#     Rails.application.config.assets.paths << Rails.root.join("node_modules")
-#   RUBY
-# end
-
-# LAYOUT
-########################################
 
 gsub_file(
   'app/views/layouts/application.html.erb',
@@ -58,20 +47,41 @@ gsub_file(
 # Flashes
 ########################################
 file 'app/views/shared/_flashes.html.erb', <<~HTML
-  <% if notice %>
-    <div class="alert alert-info alert-dismissible fade show m-1" role="alert">
-      <%= notice %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-      </button>
-    </div>
-  <% end %>
-  <% if alert %>
-    <div class="alert alert-warning alert-dismissible fade show m-1" role="alert">
-      <%= alert %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-      </button>
-    </div>
-  <% end %>
+  <div class="flex">
+    <% if notice %>
+      <div class="bg-emerald-100 border border-emerald-400 text-emerald-700 py-4 px-6 rounded absolute right-4 top-4" role="alert">
+        <span class="text-xl inline-block mr-4 align-middle">
+          <i class="fas fa-check"></i>
+        </span>
+        <span class="mr-8 block sm:inline align-middle"><%= notice %></span>
+        <button class="relative bg-transparent text-xl font-semibold leading-none right-0 outline-none focus:outline-none" onclick="closeAlert(event)">
+          <span>×</span>
+        </button>
+      </div>
+    <% end -%>
+
+    <% if alert %>
+      <div class="bg-red-100 border border-red-400 text-red-700 py-4 px-6 rounded absolute right-4 top-4" role="alert">
+        <span class="text-xl inline-block mr-4 align-middle">
+          <i class="fas fa-triangle-exclamation"></i>
+        </span>
+        <span class="mr-8 block sm:inline align-middle"><%= alert %></span>
+        <button class="relative bg-transparent text-xl font-semibold leading-none right-0 outline-none focus:outline-none" onclick="closeAlert(event)">
+          <span>×</span>
+
+        </button>
+      </div>
+    <% end -%>
+  </div>
+  <script>
+    function closeAlert(event){
+      let element = event.target;
+      while(element.nodeName !== "BUTTON"){
+        element = element.parentNode;
+      }
+      element.parentNode.parentNode.removeChild(element.parentNode);
+    }
+  </script>
 HTML
 
 inject_into_file 'app/views/layouts/application.html.erb', after: '<body>' do
@@ -84,9 +94,7 @@ end
 ########################################
 markdown_file_content = <<~MARKDOWN
   Rails app generated with template inspired by \n
-  [lewagon/rails-templates] \n
-  [Le Wagon coding bootcamp](https://www.lewagon.com) team.\n
-  Modified by Peyochanchan for Rails 7 / esbuild
+  by Peyochanchan for Rails 7 / esbuild / Tailwind / Devise
 
 MARKDOWN
 file 'README.md', markdown_file_content, force: true
@@ -97,7 +105,13 @@ generators = <<~RUBY
   config.generators do |generate|
     generate.assets false
     generate.helper false
-    generate.test_framework :test_unit, fixture: false
+    generate.test_framework(
+      :rspec,
+      fixtures: false,
+      view_specs: false,
+      helper_specs: false,
+      routing_specs: false,
+    )
   end
 RUBY
 
@@ -108,20 +122,26 @@ environment generators
 # After bundle
 ########################################
 after_bundle do
-  # Generators: db + simple form + pages controller
+  # DB Create / Migrate
   ########################################
   rails_command 'db:drop db:create db:migrate'
-  rails_command 'tailwindcss:install'
-  generate 'annotate:install'
+  # Rspec
+  ########################################
   generate 'rspec:install'
-  generate 'stimulus clock'
-  generate(:controller, 'pages', 'index', 'home', '--skip-routes', '--no-test-framework')
+
+  # Generate Pages Controller
+  ########################################
+  generate(:controller, 'pages', 'index', '--skip-routes')
 
   generate 'pundit:install' if File.readlines("Gemfile").grep(/pundit/).any?
 
   # Routes
   ########################################
-  route 'root to: "pages#home"'
+  route 'root to: "pages#index"'
+
+  # Tailwind Installation
+  ########################################
+  rails_command 'tailwindcss:install'
 
   # Gitignore
   ########################################
@@ -142,7 +162,7 @@ after_bundle do
   ########################################
   # Install Devise
   generate 'devise:install'
-
+  generate 'devise:views'
   # Configure Devise
   environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }",
               env: 'development'
@@ -216,248 +236,16 @@ after_bundle do
     empty_directory 'config'
   end
 
-  inside 'app/assets/components' do
-    create_file 'alert.css', <<-CSS
-      .alert {
-        position: fixed;
-        bottom: 16px;
-        right: 16px;
-        z-index: 1000;
-      }
-    CSS
-    create_file 'avatar.css', <<-CSS
-      .avatar {
-        height: 50px;
-        object-fit: cover;
-        width: 50px;
-        border-radius: 50%;
-      }
-
-      .avatar-large {
-        width: 50px;
-        border-radius: 50%;
-      }
-      .avatar-bordered {
-        width: 50px;
-        border-radius: 50%;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        border: white 1px solid;
-      }
-      .avatar-square {
-        width: 50px;
-        border-radius: 0px;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        border: white 1px solid;
-      }
-    CSS
-    create_file 'index.css', <<-CSS
-      @import "alert";
-      @import "avatar";
-      @import "navbar";
-    CSS
-    create_file 'navbar.css', <<-CSS
-      #sign-in-nav {
-        margin: 8px 0px 0px 15px;
-      }
-
-      .logo-nav {
-        flex: 2;
-        display: flex;
-        align-items: center;
-        color: $darkgreen;
-        h4 {
-          margin: 0;
-          font-family: $logo-font;
-        }
-        img {
-          margin-right: 12px;
-          width: 45px;
-        }
-        @media (max-width: 650px) {
-          width: 30px;
-          font-size: 10px;
-          img {
-            margin-right: 8px;
-            width: 30px;
-          }
-        }
-      }
-
-      .navbar-mh, .mobile-menu-mh ul {
-        list-style: none;
-        padding: 0;
-
-        a {
-          text-decoration: none;
-          letter-spacing: 1px;
-        }
-      }
-
-      .navbar-mh {
-        display: none;
-        justify-content: space-between;
-        width: 100%;
-        margin: auto;
-
-        li {
-          text-align: center;
-          #logo-nav {
-            flex: 2;
-          }
-          #lang {
-            flex: 1;
-          }
-          #nav-sign-in {
-            flex: 1;
-          }
-        }
-
-        .dropdown-menu {
-          top: 4% !important;
-          left: 1% !important;
-          box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 12px;
-          transform: translate3d(-12px, 42px, 0px) !important;
-          min-width: 8rem !important;
-          border-radius: 2px !important;
-        }
-
-        a {
-          padding: 8px 16px;
-          display: flex;
-          justify-content: center;
-
-          &.dropdown-item {
-            display: flex;
-            align-items: center;
-            justify-content: center ;
-            padding: 4px 8px;
-            text-transform: none;
-            i {
-              margin-left: 8px;
-            }
-          }
-
-          &.dropdown-toggle::after {
-            display: none;
-          }
-        }
-
-        @media (min-width: 768px) {
-          display: flex;
-        }
-      }
-
-      .mobile-menu-mh {
-        position: relative;
-        background: transparent;
-        width: 100%;
-
-        .link-nav {
-          font-size: 0.7em;
-        }
-
-        .burger {
-          position: fixed;
-          right: 20px;
-          top: 20px;
-          z-index: 5;
-          cursor: pointer;
-
-          div {
-            color: $whity;
-            width: 36px;
-            height: 7px;
-            background: #FDE2BD;
-            margin-bottom: 4px;
-            transition: all .3s ease
-          }
-        }
-
-        .mask {
-          background: white;
-          top: 0;
-          bottom: 0;
-          right: 0;
-          left: 0;
-          z-index: 2;
-          opacity: 0;
-          transition: opacity .5s ease;
-        }
-
-        ul {
-          position: fixed;
-          z-index: 2;
-          margin: 0;
-          width: 100vw;
-          background: white;
-          padding: 32px;
-          margin-top: -80%;
-          transition: margin-left .5s ease;
-        }
-
-        li {
-          margin-bottom: 8px;
-        }
-
-        a {
-          padding: 2px 8px;
-          font-size: 1.8em;
-        }
-
-        &.show {
-          display: block;
-
-          ul {
-            margin-top: 0;
-          }
-
-          .mask {
-            position: fixed;
-            opacity: 1;
-          }
-
-          .burger {
-            div:nth-child(1) {
-              opacity: 0;
-            }
-
-            div:nth-child(2) {
-              transform: rotate(45deg) translateY(11px);
-            }
-
-            div:nth-child(3) {
-              transform: rotate(-45deg) translateY(-11px);
-            }
-          }
-        }
-
-        @media (min-width: 768px) {
-          display: none;
-        }
-      }
-        a.indent {
-          text-indent: 2em;
-          border: none !important;
-        }
-
-        a.hidden {
-          display: none;
-        }
-    CSS
-  end
+  create_file 'app/assets/stylesheets/components/index.css'
 
   inside 'app/assets/stylesheets' do
     empty_directory 'pages'
   end
-  create_file 'app/assets/stylesheets/pages/home.css'
   create_file 'app/assets/stylesheets/pages/index.css'
-  append_to_file 'app/assets/stylesheets/pages/index.css', <<-CSS
-    @import "home";
-  CSS
+
   append_to_file 'app/assets/stylesheets/application.tailwind.css', <<-CSS
     @import "components/index";
     @import "pages/index";
-
   CSS
   # Pages Controller
   ########################################
@@ -467,13 +255,15 @@ after_bundle do
 
   # Home Page
   ########################################
+  generate 'stimulus clock'
+  create_file 'app/assets/stylesheets/pages/clock.css'
   run 'rm app/views/pages/home.html.erb'
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.html.erb > app/views/pages/home.html.erb"
 
   run 'rm app/javascript/controllers/clock_controller.js'
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock_controller.js >  app/javascript/controllers/clock_controller.js"
 
-  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/home.css > app/assets/stylesheets/pages/home.css"
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock.css > app/assets/stylesheets/components/clock.css"
 
   # migrate + devise views
   ########################################
@@ -498,10 +288,9 @@ after_bundle do
 
   # Yarn
   ########################################
-  run 'yarn add esbuild chokidar sass @popperjs/core autoprefixer nodemon postcss postcss-cli'
-  after_bundle do
-    run "yarn add chokidar --dev"
-  end
+  run 'yarn add autoprefixer chokidar esbuild nodemon postcss postcss-cli postcss-flexbugs-fixes postcss-import postcss-nested postcss-preset-env sass sweetalert2 tailwindcss'
+  run 'yarn add chokidar --dev'
+
   # ESBUILD CONFIG
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
   gsub_file(
@@ -510,44 +299,55 @@ after_bundle do
     '"scripts": {
       "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
       "start": "node esbuild-dev.config.js",
-      "build:css:compile": "sass ./app/assets/stylesheets/application.tailwind.css:./app/assets/builds/application.css --no-source-map --load-path=node_modules",
-      "build:css:prefix": "postcss ./app/assets/builds/application.css --use=autoprefixer --output=./app/assets/builds/application.css",
-      "build:css": "yarn build:css:compile && yarn build:css:prefix",
-      "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext css --exec \\"yarn build:css\\""
-    },
-    "browserslist": [
-      "defaults"
-    ],
-    "devDependencies": {
-      "chokidar": "^3.6.0"
-    }'
+      "build:css": "tailwindcss --postcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css",
+      "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext css --exec \"yarn build:css\""
+    },'
   )
   run 'rm -f app/assets/builds/application.js.map'
 
-  insert_into_file 'config/tailwind.config.js', before: "],\n  theme: {" do
-    "  './app/assets/stylesheets/**/*.css',\n"
+  create_file './postcss.config.js' do
+    <<~JS
+      import autoprefixer from "autoprefixer";
+      import postcssImport from "postcss-import";
+      import tailwindcss from "tailwindcss";
+      import postcssNested from "postcss-nested";
+      import postcssFlexbugsFixes from "postcss-flexbugs-fixes";
+      import postcssPresetEnv from "postcss-preset-env";
+
+      export default {
+        plugins: [
+          autoprefixer,
+          postcssImport,
+          tailwindcss,
+          postcssNested,
+          postcssFlexbugsFixes,
+          postcssPresetEnv({
+            autoprefixer: {
+              flexbox: "no-2009"
+            },
+            stage: 3
+          })
+        ],
+      };
+    JS
   end
 
-  append_to_file 'app/assets/config/manifest.js', '//= link application.tailwind.css'
-
+  remove_file 'config/tailwind.config.js'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/config/tailwind.config.js > tailwind.config.js"
+  # Manifest & Assets
+  #########################################
+  append_to_file 'app/assets/config/manifest.js', '//= link tailwind.css'
   remove_file 'app/assets/stylesheets/application.css'
-  # gsub_file(
-  #   'node_modules/bootstrap/scss/_functions.scss',
-  #   '@return mix(rgba($foreground, 1), $background, opacity($foreground) * 100);',
-  #   '@return mix(rgba($foreground, 1%), $background, opacity($foreground) * 100%);'
-  # )
 
-  # append_file 'app/javascript/application.js', <<~JS
-  #   import "bootstrap"
-  # JS
-  # PROCFILE
+  # Procfile
+  ########################################
   run 'rm Procfile.dev'
-  file 'Procfile.dev',
-    <<~RUBY
-      web: bin/rails server -p 3000
-      css: yarn build:css --watch
-      js: yarn start --watch
-    RUBY
+  file 'Procfile.dev', <<~RUBY
+    web: bin/rails server -p 3000
+    css: yarn build:css --watch
+    js: yarn start --watch
+    css: bin/rails tailwindcss:watch
+  RUBY
 
   # HEROKU
   ########################################
