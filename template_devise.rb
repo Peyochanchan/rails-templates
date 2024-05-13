@@ -73,6 +73,12 @@ inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
   HTML
 end
 
+inject_into_file 'app/views/layouts/application.html.erb', after: "<%= csp_meta_tag %>" do
+  <<~HTML
+    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+  HTML
+end
+
 remove_line = <<~HTML
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 HTML
