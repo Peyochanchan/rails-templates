@@ -73,11 +73,11 @@ inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
   HTML
 end
 
-inject_into_file 'app/views/layouts/application.html.erb', after: "<%= csp_meta_tag %>\n" do
-  <<~HTML
-    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
-  HTML
-end
+# inject_into_file 'app/views/layouts/application.html.erb', after: "<%= csp_meta_tag %>\n" do
+#   <<~HTML
+#     <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+#   HTML
+# end
 
 remove_line = <<~HTML
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
@@ -157,6 +157,10 @@ after_bundle do
   # Install Devise
   generate 'devise:install'
   generate 'devise:views'
+
+  run "curl -L https://github.com/Peyochanchan/rails-templates/main/devise_views.zip > devise_views.zip"
+  run "unzip devise_views.zip -d app/views && rm -f devise_views.zip"
+
   # Configure Devise
   environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }",
               env: 'development'
@@ -263,22 +267,6 @@ after_bundle do
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock_controller.js >  app/javascript/controllers/clock_controller.js"
 
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock.css > app/assets/stylesheets/components/clock.css"
-
-  # migrate + devise views
-  ########################################
-  rails_command 'db:migrate'
-  generate('devise:views')
-
-  # link_to = <<~HTML
-  #   <p>Unhappy? <%= link_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete %></p>
-  # HTML
-  # button_to = <<~HTML
-  #   <div class="d-flex align-items-center">
-  #     <div>Unhappy?</div>
-  #     <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: "btn btn-link" %>
-  #   </div>
-  # HTML
-  # gsub_file('app/views/devise/registrations/edit.html.erb', link_to, button_to)
 
   # Environments
   ########################################
