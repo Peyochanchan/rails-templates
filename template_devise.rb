@@ -158,7 +158,7 @@ after_bundle do
   generate 'devise:install'
   # generate 'devise:views'
 
-  url = "https://github.com/Peyochanchan/rails-templates/raw/5a83d7f26865804265417ea7f4d51c1fdce878ee/devise_views.zip"
+  url = "https://github.com/Peyochanchan/rails-templates/raw/main/devise_views.zip"
 
   # Définir le nom du fichier ZIP
   zip_file = "devise_views.zip"
