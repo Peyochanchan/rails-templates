@@ -23,7 +23,7 @@ gsub_file(
   'app/views/layouts/application.html.erb',
   '<meta name="viewport" content="width=device-width,initial-scale=1">',
   '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-   <script src="https://kit.fontawesome.com/d39b0756a2.js" crossorigin="anonymous"></script>'
+    <script src="https://kit.fontawesome.com/d39b0756a2.js" crossorigin="anonymous"></script>'
 
 )
 
@@ -73,7 +73,7 @@ inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
   HTML
 end
 
-inject_into_file 'app/views/layouts/application.html.erb', after: "<%= csp_meta_tag %>" do
+inject_into_file 'app/views/layouts/application.html.erb', after: "<%= csp_meta_tag %>\n" do
   <<~HTML
     <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
   HTML
@@ -243,9 +243,11 @@ after_bundle do
   @import "tailwindcss/utilities";
   @import "components/index";
 
-  h1 {
-    color: theme('colors.green.500');
-    font-family: "Roboto", sans-serif;
+  .ror-version {
+    h1 {
+      color: theme('colors.green.500');
+      font-family: "Roboto", sans-serif;
+    }
   }
   CSS
 
@@ -297,7 +299,7 @@ after_bundle do
     '"scripts": {
       "build": "esbuild app/javascript/*.* --bundle --sourcemap --format=esm --outdir=app/assets/builds --public-path=/assets",
       "start": "node esbuild-dev.config.js",
-      "build:css": "tailwindcss --postcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/tailwind.css",
+      "build:css": "tailwindcss --postcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css",
       "watch:css": "nodemon --watch ./app/assets/stylesheets/ --ext css --exec \"yarn build:css\""
     },
     "browserslist": [
@@ -345,8 +347,9 @@ after_bundle do
   #########################################
   append_to_file 'app/assets/config/manifest.js', '//= link tailwind.css'
   remove_file 'app/assets/stylesheets/application.css'
-  remove_file 'app/assets/builds/application.css'
-
+  # remove_file 'app/assets/builds/application.css'
+  rails_command "assets:clobber"
+  rails_command "assets:clean"
   # Procfile
   ########################################
   run 'rm Procfile.dev'

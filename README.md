@@ -1,7 +1,9 @@
 Rails app generated with template inspired by [lewagon/rails-templates]
 [Le Wagon coding bootcamp](https://www.lewagon.com) team.
 
-Modified by Peyochanchan for Rails 7 / esbuild
+Modified for Rails 7 / Esbuild / Devise / Tailwind / ActiveAdmin (optional)
+
+Clone the repo and type this command in terminal :
 
 rails new \
 -d postgresql \
@@ -9,6 +11,9 @@ rails new \
 -T -m ~/path/to/template/template_devise.rb \
 -c tailwind \
 [APPLICATION_NAME]
+
+
+example :
 
 rails new \
 -d postgresql \
