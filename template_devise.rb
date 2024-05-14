@@ -158,22 +158,43 @@ after_bundle do
   generate 'devise:install'
   # generate 'devise:views'
 
-  url = "https://github.com/Peyochanchan/rails-templates/raw/main/devise_views.zip"
+  url = "https://github.com/Peyochanchan/rails-templates/blob/5a83d7f26865804265417ea7f4d51c1fdce878ee/devise_views.zip"
 
-  # Définir le nom du fichier ZIP
-  zip_file = "devise_views.zip"
+    # Définir le nom du fichier ZIP
+    zip_file = "devise_views.zip"
 
-  # Télécharger le fichier ZIP
-  run "curl -L #{url} -o #{zip_file}"
+    # Télécharger le fichier ZIP
+    say "Téléchargement du fichier ZIP..."
+    run "curl -L #{url} -o #{zip_file}"
 
-  # Extraire le fichier ZIP dans app/views
-  run "unzip #{zip_file} -d app/views"
+    # Vérifier si le fichier ZIP a été téléchargé correctement
+    unless File.exist?(zip_file)
+      say "Le téléchargement du fichier ZIP a échoué.", :red
+      return
+    end
 
-  # Déplacer le contenu extrait dans le bon répertoire
-  run "mv app/views/devise/* app/views/ && rm -rf app/views/devise"
+    # Extraire le fichier ZIP dans app/views
+    say "Extraction du fichier ZIP..."
+    run "unzip #{zip_file} -d app/views"
 
-  # Supprimer le fichier ZIP
-  run "rm -f #{zip_file}"
+    # Vérifier si l'extraction a réussi
+    if $?.exitstatus != 0
+      say "L'extraction du fichier ZIP a échoué.", :red
+      return
+    end
+
+    # Déplacer le contenu extrait dans le bon répertoire
+    run "mv app/views/devise/* app/views/ && rm -rf app/views/devise"
+
+    # Supprimer le fichier ZIP
+    run "rm -f #{zip_file}"
+
+    say "Téléchargement et extraction des vues Devise terminés."
+
+    # Exécuter les migrations de la base de données
+    rails_command "db:migrate"
+
+    say "Migrations de la base de données exécutées."
 
   # Configure Devise
   environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }",
@@ -192,8 +213,6 @@ after_bundle do
   append_to_file(
     'app/models/user.rb',
     "\n\n  has_one_attached :avatar\n  validates :nickname, uniqueness: true", after: ':recoverable, :rememberable, :validatable')
-
-  rails_command "db:migrate"
 
   # Application controller
   ########################################
