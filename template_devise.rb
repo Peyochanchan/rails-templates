@@ -156,10 +156,21 @@ after_bundle do
   ########################################
   # Install Devise
   generate 'devise:install'
-  generate 'devise:views'
+  # generate 'devise:views'
 
-  run "curl -L https://github.com/Peyochanchan/rails-templates/main/devise_views.zip > devise_views.zip"
-  run "unzip devise_views.zip -d app/views && rm -f devise_views.zip"
+  url = "https://github.com/Peyochanchan/rails-templates/raw/5a83d7f26865804265417ea7f4d51c1fdce878ee/devise_views.zip"
+
+  # Définir le nom du fichier ZIP
+  zip_file = "devise_views.zip"
+
+  # Télécharger le fichier ZIP
+  run "curl -L #{url} -o #{zip_file}"
+
+  # Extraire le fichier ZIP dans app/views
+  run "unzip #{zip_file} -d app/views"
+
+  # Supprimer le fichier ZIP
+  run "rm -f #{zip_file}"
 
   # Configure Devise
   environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }",
@@ -338,6 +349,7 @@ after_bundle do
   # remove_file 'app/assets/builds/application.css'
   rails_command "assets:clobber"
   rails_command "assets:clean"
+
   # Procfile
   ########################################
   run 'rm Procfile.dev'
