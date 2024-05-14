@@ -169,6 +169,9 @@ after_bundle do
   # Extraire le fichier ZIP dans app/views
   run "unzip #{zip_file} -d app/views"
 
+  # Déplacer le contenu extrait dans le bon répertoire
+  run "mv app/views/devise/* app/views/ && rm -rf app/views/devise"
+
   # Supprimer le fichier ZIP
   run "rm -f #{zip_file}"
 
@@ -189,6 +192,8 @@ after_bundle do
   append_to_file(
     'app/models/user.rb',
     "\n\n  has_one_attached :avatar\n  validates :nickname, uniqueness: true", after: ':recoverable, :rememberable, :validatable')
+
+  rails_command "db:migrate"
 
   # Application controller
   ########################################
@@ -349,7 +354,6 @@ after_bundle do
   # remove_file 'app/assets/builds/application.css'
   rails_command "assets:clobber"
   rails_command "assets:clean"
-
   # Procfile
   ########################################
   run 'rm Procfile.dev'
