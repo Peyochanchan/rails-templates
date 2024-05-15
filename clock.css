@@ -11,7 +11,7 @@
 .border-orange {
   width: 50%;
   margin: 20px auto;
-  border-top: 4px solid theme(colors.orange.400);
+  border-top: 4px solid theme(colors.orange.500);
   box-shadow:
     0 0 0 1px rgba(0,0,0,0.8),
   }
@@ -20,7 +20,7 @@
   background-color: black;
   width: 20rem;
   height: 20rem;
-  border: 12px solid theme(colors.orange.400);
+  border: 12px solid theme(colors.orange.500);
   border-radius: 50%;
   margin: 50px auto;
   position: relative;
@@ -78,7 +78,7 @@
 }
 
 .hand.second {
-  background: theme(colors.orange.400);
+  background: theme(colors.orange.500);
   top: 50%;
   left: -7%;
   transform-origin: 100%;
