@@ -157,7 +157,7 @@ after_bundle do
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock_controller.js >  app/javascript/controllers/clock_controller.js"
 
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/clock.css > app/assets/stylesheets/components/clock.css"
-
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/arko-sigle_color.svg > app/assets/images/arko-sigle_color.svg"
   # Environments
   ########################################
   environment 'config.action_mailer.default_url_options = { host: "http://localhost:3000" }', env: "development"

@@ -36,7 +36,7 @@ export default {
     formsPlugin,
     aspectRatioPlugin,
     typographyPlugin,
-    containerQueriesPlugin
+    containerQueriesPlugin,
     flowBitePlugin
   ]
 };
