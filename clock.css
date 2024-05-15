@@ -8,10 +8,10 @@
   }
 }
 
-.border-rouge {
+.border-orange {
   width: 50%;
   margin: 20px auto;
-  border-top: 4px solid red;
+  border-top: 4px solid #E78322;
   box-shadow:
     0 0 0 1px rgba(0,0,0,0.8),
   }
@@ -20,7 +20,7 @@
   background-color: black;
   width: 20rem;
   height: 20rem;
-  border: 12px solid red;
+  border: 12px solid #E78322;
   border-radius: 50%;
   margin: 50px auto;
   position: relative;
@@ -78,7 +78,7 @@
 }
 
 .hand.second {
-  background: red;
+  background: #E78322;
   top: 50%;
   left: -7%;
   transform-origin: 100%;

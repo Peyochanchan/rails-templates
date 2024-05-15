@@ -22,67 +22,30 @@ end
 gsub_file(
   'app/views/layouts/application.html.erb',
   '<meta name="viewport" content="width=device-width,initial-scale=1">',
-  '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <script src="https://kit.fontawesome.com/d39b0756a2.js" crossorigin="anonymous"></script>'
-
+  '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">'
 )
-
-# Flashes
-########################################
-file 'app/views/shared/_flashes.html.erb', <<~HTML
-  <div class="flex">
-    <% if notice %>
-      <div class="bg-emerald-100 border border-emerald-400 text-emerald-700 py-4 px-6 rounded absolute right-4 top-4" role="alert">
-        <span class="text-xl inline-block mr-4 align-middle">
-          <i class="fas fa-check"></i>
-        </span>
-        <span class="mr-8 block sm:inline align-middle"><%= notice %></span>
-        <button class="relative bg-transparent text-xl font-semibold leading-none right-0 outline-none focus:outline-none" onclick="closeAlert(event)">
-          <span>×</span>
-        </button>
-      </div>
-    <% end -%>
-
-    <% if alert %>
-      <div class="bg-red-100 border border-red-400 text-red-700 py-4 px-6 rounded absolute right-4 top-4" role="alert">
-        <span class="text-xl inline-block mr-4 align-middle">
-          <i class="fas fa-triangle-exclamation"></i>
-        </span>
-        <span class="mr-8 block sm:inline align-middle"><%= alert %></span>
-        <button class="relative bg-transparent text-xl font-semibold leading-none right-0 outline-none focus:outline-none" onclick="closeAlert(event)">
-          <span>×</span>
-
-        </button>
-      </div>
-    <% end -%>
-  </div>
-  <script>
-    function closeAlert(event){
-      let element = event.target;
-      while(element.nodeName !== "BUTTON"){
-        element = element.parentNode;
-      }
-      element.parentNode.parentNode.removeChild(element.parentNode);
-    }
-  </script>
-HTML
-
-inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
+inject_into_file 'app/views/layouts/application.html.erb', after: "<%= csp_meta_tag %>\n" do
   <<~HTML
-    <%= render "shared/flashes" %>
+    <script src="https://kit.fontawesome.com/d39b0756a2.js" crossorigin="anonymous"></script>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   HTML
 end
-
-# inject_into_file 'app/views/layouts/application.html.erb', after: "<%= csp_meta_tag %>\n" do
-#   <<~HTML
-#     <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
-#   HTML
-# end
+inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
+  <<~HTML
+  <%= render 'shared/navbar' %>
+  <%= render "shared/flashes" %>
+  HTML
+end
 
 remove_line = <<~HTML
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 HTML
 gsub_file 'app/views/layouts/application.html.erb', remove_line, ''
+# Flashes
+########################################
+run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/_flashes.html.erb > app/views/shared/_flashes.html.erb"
+run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/_navbar.html.erb > app/views/shared/_navbar.html.erb"
+
 # README
 ########################################
 markdown_file_content = <<~MARKDOWN
