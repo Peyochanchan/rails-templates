@@ -1,23 +1,39 @@
-Rails app generated with template inspired by [lewagon/rails-templates]
-[Le Wagon coding bootcamp](https://www.lewagon.com) team.
+# Rails app for Arko Backend generated with template
+inspired by
 
-Modified for Rails 7 / Esbuild / Devise / Tailwind / ActiveAdmin (optional)
+### [Le Wagon coding bootcamp](https://www.lewagon.com)
 
-Clone the repo and type this command in terminal :
+### [Devise](https://github.com/heartcombo/devise/wiki)
 
+### [Esbuild](https://esbuild.github.io/)
+
+### [ActiveAdmin](https://activeadmin.info/documentation.html)
+
+I also borrowed some views from
+### [Devise Tailwinded](https://github.com/esmale/devise-tailwinded) that I modified for convenience.
+
+Stack is Rails 7.1.3.2 - Ruby 3.2.2
+Esbuild / Devise / Tailwind / ActiveAdmin (optional)
+
+#### Clone the repo and type this command in terminal :
+
+```bash
 rails new \
 -d postgresql \
 -j esbuild \
 -T -m ~/path/to/template/template_devise.rb \
--c tailwind \
 [APPLICATION_NAME]
+```
 
+*example :*
 
-example :
-
+```bash
 rails new \
 -d postgresql \
 -j esbuild \
--c tailwind \
 -T -m ./rails-templates/template_devise.rb \
-templaide
+template-peyochanchan
+```
+
+then follow the instructions. Have Fun !!!
+
