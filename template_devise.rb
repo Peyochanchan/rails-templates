@@ -11,7 +11,7 @@ remove_file 'Gemfile'
 run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/Gemfile > Gemfile"
 
 if yes?('Would you like to add activeadmin?[yes | no]')
-  inject_into_file 'Gemfile', after: "gem 'devise'\n" do
+  inject_into_file 'Gemfile', after: "gem 'devise'  \n" do
     <<~RUBY
       gem 'activeadmin'
       gem 'inherited_resources'
@@ -19,39 +19,12 @@ if yes?('Would you like to add activeadmin?[yes | no]')
   end
 end
 
-gsub_file(
-  'app/views/layouts/application.html.erb',
-  '<meta name="viewport" content="width=device-width,initial-scale=1">',
-  '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">'
-)
-inject_into_file 'app/views/layouts/application.html.erb', after: "<%= csp_meta_tag %>\n" do
-  <<~HTML
-    <script src="https://kit.fontawesome.com/d39b0756a2.js" crossorigin="anonymous"></script>
-    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-  HTML
-end
-inject_into_file 'app/views/layouts/application.html.erb', after: "<body>\n" do
-  <<~HTML
-  <%= render 'shared/navbar' %>
-  <%= render "shared/flashes" %>
-  HTML
-end
-
-remove_line = <<~HTML
-  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-HTML
-gsub_file 'app/views/layouts/application.html.erb', remove_line, ''
-# Flashes
-########################################
-run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/_flashes.html.erb > app/views/shared/_flashes.html.erb"
-run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/_navbar.html.erb > app/views/shared/_navbar.html.erb"
 
 # README
 ########################################
 markdown_file_content = <<~MARKDOWN
   Rails app generated with template inspired by \n
   by Peyochanchan for Rails 7 / Esbuild / Tailwind / Devise / Pundit
-
 MARKDOWN
 file 'README.md', markdown_file_content, force: true
 
@@ -78,27 +51,19 @@ environment generators
 # After bundle
 ########################################
 after_bundle do
-  # DB Create / Migrate
-  ########################################
+  # DB Create
   rails_command 'db:drop db:create db:migrate'
-  # Rspec
-  ########################################
   generate 'rspec:install'
+  generate 'pundit:install' if File.readlines("Gemfile").grep(/pundit/).any?
 
   # Generate Pages Controller
   ########################################
   generate(:controller, 'pages', 'index', '--skip-routes')
-
-  generate 'pundit:install' if File.readlines("Gemfile").grep(/pundit/).any?
-
-  # Routes
-  ########################################
   route 'root to: "pages#index"'
 
   # Tailwind Installation
   ########################################
   run("echo yes | bin/rails tailwindcss:install")
-
 
   # Gitignore
   ########################################
@@ -117,7 +82,6 @@ after_bundle do
 
   # Devise install + user
   ########################################
-  # Install Devise
   generate 'devise:install'
   generate 'devise:views'
   run "rm -rf app/views/devise"
@@ -128,14 +92,11 @@ after_bundle do
   run "rm -rf app/views/devise/.DS_Store"
   rails_command "db:migrate"
 
-  # Configure Devise
   environment "config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }",
               env: 'development'
 
-  # Create Devise User
   generate :devise, 'User', 'first_name', 'last_name', 'nickname', 'admin:boolean'
 
-  # set admin boolean to false by default
   in_root do
     migration = Dir.glob('db/migrate/*').max_by { |f| File.mtime(f) }
     gsub_file migration, /:admin/, ':admin, default: false'
@@ -146,57 +107,8 @@ after_bundle do
     'app/models/user.rb',
     "\n\n  has_one_attached :avatar\n  validates :nickname, uniqueness: true", after: ':recoverable, :rememberable, :validatable')
 
-  # Application controller
-  ########################################
-  run 'rm app/controllers/application_controller.rb'
-
-  app_controller_content_with_pundit = <<~RUBY
-    class ApplicationController < ActionController::Base
-      before_action :authenticate_user!, if: :devise_controller?
-      before_action :configure_permitted_parameters, if: :devise_controller?
-      include Pundit::Authorization
-      after_action :verify_pundit_authorization, unless: :devise_controller?
-
-
-      def configure_permitted_parameters
-        devise_parameter_sanitizer.permit(:sign_up, keys: %i[first_name last_name nickname avatar password password_confirmation])
-        devise_parameter_sanitizer.permit(:account_update, keys: %i[first_name last_name nickname avatar password password_confirmation current_password])
-      end
-
-      private
-
-      # Uncomment when you *really understand* Pundit!
-      # rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
-      # def user_not_authorized
-      #   flash[:alert] = "You are not authorized to perform this action."
-      #   redirect_to(root_path)
-      # end
-
-      def verify_pundit_authorization
-        if action_name == "index"
-          verify_policy_scoped if params[:controller] != "pages"
-        else
-          verify_authorized
-        end
-      end
-    end
-  RUBY
-
-  app_controller_content_without_pundit = <<~RUBY
-    class ApplicationController < ActionController::Base
-      before_action :authenticate_user!
-    end
-  RUBY
-
-  if File.readlines("Gemfile").grep(/pundit/).any?
-    file 'app/controllers/application_controller.rb', app_controller_content_with_pundit
-  else
-    file 'app/controllers/application_controller.rb', app_controller_content_without_pundit
-  end
-
   # Assets
   ########################################
-
   inside 'app/assets/stylesheets' do
     empty_directory 'config'
     empty_directory 'components'
@@ -245,7 +157,8 @@ after_bundle do
   run 'yarn add autoprefixer chokidar esbuild nodemon postcss postcss-cli postcss-flexbugs-fixes postcss-import postcss-nested postcss-preset-env sass sweetalert2 tailwindcss'
   run 'yarn add chokidar --dev'
 
-  # ESBUILD CONFIG
+  # ESBUILD CONFIG + Hot Reload
+  ########################################
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/esbuild-dev.config.js > esbuild-dev.config.js"
   insert_into_file 'package.json', "  \"type\": \"module\",\n", after: "\"private\": true,\n"
   gsub_file(
@@ -294,27 +207,40 @@ after_bundle do
   end
 
   tailwind_config_url = "https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/tailwind.config.js"
-  local_file_path = 'config/tailwind.config.js'
+  tailwind_file_path = 'config/tailwind.config.js'
   remote_content = URI.open(tailwind_config_url).read
-  create_file local_file_path, remote_content, force: true
+  create_file tailwind_file_path, remote_content, force: true
 
-  # Manifest & Assets
+  # Manifest & Cleaning Assets
   #########################################
   append_to_file 'app/assets/config/manifest.js', '//= link tailwind.css'
   remove_file 'app/assets/stylesheets/application.css'
   # remove_file 'app/assets/builds/application.css'
   rails_command "assets:clobber"
   rails_command "assets:clean"
+
+  # Layout / Navbar / Flashes
+  ########################################
+  run "rm -rf app/views/layouts/application.html.erb"
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/_flashes.html.erb > app/views/shared/_flashes.html.erb"
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/_navbar.html.erb > app/views/shared/_navbar.html.erb"
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/application.html.erb > app/views/layouts/application.html.erb"
+
+  # Application controller
+  ########################################
+  run 'rm app/controllers/application_controller.rb'
+  run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/application_controller.rb > app/controllers/application_controller.rb"
+
   # Procfile
   ########################################
-  run 'rm Procfile.dev'
-  file 'Procfile.dev', <<~RUBY
+  procfile_new_content = <<~RUBY
     web: bin/rails server -p 3000
     css: yarn build:css --watch
     js: yarn start --watch
     css: bin/rails tailwindcss:watch
   RUBY
 
+  create_file 'Procfile.dev', procfile_new_content, force: true
   # HEROKU
   ########################################
   run 'bundle lock --add-platform x86_64-linux'
