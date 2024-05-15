@@ -126,10 +126,21 @@ after_bundle do
   @import "tailwindcss/utilities";
   @import "components/index";
 
+  @layer components {
+    .orange-btn {
+      @apply text-white bg-orange-700 hover:text-black hover:bg-orange-300 focus:ring-4 focus:outline-none focus:ring-amber-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-amber-600 dark:hover:bg-amber-700 dark:focus:ring-amber-800;
+    }
+  }
   .ror-version {
     h1 {
-      color: theme('colors.green.500');
+      color: theme('colors.orange.400');
       font-family: "Roboto", sans-serif;
+    }
+    p {
+      color: theme('colors.gray.500');
+      margin-top: 12px;
+      text-align: center;
+      font: 18px 'PT Mono', monospace;
     }
   }
   CSS
@@ -154,7 +165,7 @@ after_bundle do
 
   # Yarn
   ########################################
-  run 'yarn add autoprefixer chokidar esbuild nodemon postcss postcss-cli postcss-flexbugs-fixes postcss-import postcss-nested postcss-preset-env sass sweetalert2 tailwindcss'
+  run 'yarn add autoprefixer chokidar esbuild nodemon postcss postcss-cli postcss-flexbugs-fixes postcss-import postcss-nested postcss-preset-env sass sweetalert2 tailwindcss flowbite'
   run 'yarn add chokidar --dev'
 
   # ESBUILD CONFIG + Hot Reload
@@ -215,13 +226,13 @@ after_bundle do
   #########################################
   append_to_file 'app/assets/config/manifest.js', '//= link tailwind.css'
   remove_file 'app/assets/stylesheets/application.css'
-  # remove_file 'app/assets/builds/application.css'
   rails_command "assets:clobber"
   rails_command "assets:clean"
-
+  rails_command "db:migrate"
   # Layout / Navbar / Flashes
   ########################################
   run "rm -rf app/views/layouts/application.html.erb"
+  run "mkdir app/views/shared"
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/_flashes.html.erb > app/views/shared/_flashes.html.erb"
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/_navbar.html.erb > app/views/shared/_navbar.html.erb"
   run "curl -L https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/application.html.erb > app/views/layouts/application.html.erb"
