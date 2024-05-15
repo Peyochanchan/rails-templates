@@ -85,7 +85,7 @@ after_bundle do
   generate 'devise:install'
   generate 'devise:views'
   run "rm -rf app/views/devise"
-  run "curl -L https://github.com/Peyochanchan/rails-templates/raw/main/devise_views.zip -o devise_views.zip"
+  run "curl -L https://github.com/Peyochanchan/rails-templates/raw/main/devise_views_tailwind.zip -o devise_views.zip"
   run "file devise_views.zip"
   run "unzip devise_views.zip -d app/views"
   run "rm -f devise_views.zip"
@@ -128,9 +128,10 @@ after_bundle do
 
   @layer components {
     .orange-btn {
-      @apply text-white bg-orange-700 hover:text-black hover:bg-orange-300 focus:ring-4 focus:outline-none focus:ring-amber-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-amber-600 dark:hover:bg-amber-700 dark:focus:ring-amber-800;
+      @apply text-white font-bold bg-orange-700 hover:bg-orange-500 focus:ring-4 focus:outline-none focus:ring-orange-300 rounded text-sm px-4 py-2 text-center dark:bg-orange-600 dark:hover:bg-orange-700 dark:focus:ring-orange-800;
     }
   }
+
   .ror-version {
     h1 {
       color: theme('colors.orange.400');
@@ -216,6 +217,13 @@ after_bundle do
       };
     JS
   end
+
+  append_to_file('app/javascript/application.js', <<~JS
+    import "flowbite/dist/flowbite.turbo.js";
+    // import 'flowbite-datepicker';
+    // import 'flowbite/dist/datepicker.turbo.js';
+  JS
+  )
 
   tailwind_config_url = "https://raw.githubusercontent.com/Peyochanchan/rails-templates/main/tailwind.config.js"
   tailwind_file_path = 'config/tailwind.config.js'
